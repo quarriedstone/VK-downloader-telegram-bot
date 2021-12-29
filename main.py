@@ -5,7 +5,7 @@ from telegram.ext import CommandHandler
 
 from handlers import start, logger, get_url
 
-TOKEN = os.getenv("TG_TOKEN", '982112851:AAHfZlRWnSsCdm58-uUfnjS9HtlMbO72l_M')
+TOKEN = os.getenv("TG_TOKEN")
 
 updater = Updater(token=TOKEN)
 dispatcher = updater.dispatcher
