@@ -1,46 +1,35 @@
-import logging
-import os
-
 from telegram import Update
 from telegram.ext import CallbackContext
-import youtube_dl
 from youtube_dl import DownloadError
 
-from content import START_TEXT, DOWNLOAD_START, ERRORS
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger()
+import utils
+from content import (
+    DOWNLOAD_START,
+    START_TEXT,
+    WRONG_URL_ERRORS,
+)
+from utils import logger
 
 
 def start(update: Update, context: CallbackContext):
-    logger.info(f"user_id: {update.effective_chat.id}, message: {update.message.text}")
+    logger.info(f'user_id: {update.effective_chat.id}, message: {update.message.text}')
     context.bot.send_message(chat_id=update.effective_chat.id, text=START_TEXT)
 
 
 def get_url(update: Update, context: CallbackContext):
-    filename = None
-
-    def handle_video(d):
-        if d["status"] == 'finished':
-            nonlocal filename
-            filename = d["filename"]
-            logger.info(f"user_id: {update.effective_chat.id}, filename: {d['filename']} - DOWNLOADED")
-
-    logger.info(f"user_id: {update.effective_chat.id}, message: {update.message.text}")
+    logger.info(f'user_id: {update.effective_chat.id}, message: {update.message.text}')
     context.bot.send_message(chat_id=update.effective_chat.id, text=DOWNLOAD_START)
-
     url = update.message.text
-    opt = {
-        "nooverwrites": True,
-        "progress_hooks": [handle_video]
-    }
+    filename = f'{update.effective_chat.id}_{update.effective_message.message_id}.mp4'
+
+    # TODO add queue to not downloading a lot of video in one time
     try:
-        with youtube_dl.YoutubeDL(opt) as ydl:
-            ydl.download([url])
-        context.bot.send_video(chat_id=update.effective_chat.id, video=open(filename, "rb"))
-        os.remove(filename)
-        logger.info(f"user_id: {update.effective_chat.id}, filename: {filename} - REMOVED FROM DISK")
+        utils.download_video(
+            url,
+            filename,
+        )
+        context.bot.send_video(chat_id=update.effective_chat.id, video=open(filename, 'rb'))
+        utils.delete_video(filename)
     except DownloadError as e:
         logger.warning(e)
-        context.bot.send_message(chat_id=update.effective_chat.id, text=ERRORS["wrong_url"])
+        context.bot.send_message(chat_id=update.effective_chat.id, text=WRONG_URL_ERRORS)
