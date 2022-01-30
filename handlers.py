@@ -28,7 +28,7 @@ def get_url(update: Update, context: CallbackContext):
             url,
             filename,
         )
-        context.bot.send_document(chat_id=update.effective_chat.id, video=open(filename, 'rb'))
+        context.bot.send_document(chat_id=update.effective_chat.id, document=open(filename, 'rb'))
         utils.delete_video(filename)
     except DownloadError as e:
         logger.warning(e)
