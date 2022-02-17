@@ -18,6 +18,9 @@ def download_video(url, filename):
         'outtmpl': filename,
         'progress_hooks': [handle_video],
         'quiet': True,
+        'postprocessors': [
+            {"key": "FFmpegVideoConvertor", "preferedformat": "mp4"}
+        ]
     }
     with youtube_dl.YoutubeDL(opt) as ydl:
         ydl.download([url])
