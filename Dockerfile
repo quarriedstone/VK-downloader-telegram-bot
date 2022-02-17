@@ -1,4 +1,6 @@
 FROM python:3.9
+RUN apt-get -y update
+RUN apt-get install -y ffmpeg
 
 WORKDIR /
 COPY requirements.txt handlers.py main.py content.py utils.py /
